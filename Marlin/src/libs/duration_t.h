@@ -149,30 +149,27 @@ struct duration_t {
    *
    * Output examples:
    *  123456789 (strlen)
-   *  12'34
-   *  99:59
-   *  11d 12:33
+   *  12:34:56
+   *  99:59:01
+   *  11d 12:33:45
    */
   uint8_t toDigital(char *buffer, bool with_days=false) const {
     const uint16_t h = uint16_t(this->hour()),
-                   m = uint16_t(this->minute() % 60UL);
+                   m = uint16_t(this->minute() % 60UL),
+                   s = uint16_t(this->second() % 60UL);
+                   
     if (with_days) {
       const uint16_t d = this->day();
-      sprintf_P(buffer, PSTR("%hud %02hu:%02hu"), d, h % 24, m);  // 1d 23:45
-      return d >= 10 ? 9 : 8;
-    }
-    else if (!h) {
-      const uint16_t s = uint16_t(this->second() % 60UL);
-      sprintf_P(buffer, PSTR("%02hu'%02hu"), m, s);     // 12'34
-      return 5;
+      sprintf_P(buffer, PSTR("%hud %02hu:%02hu:%02hu"), d, h % 24, m, s);  // 1d 23:45:01
+      return d >= 10 ? 12 : 11;
     }
     else if (h < 100) {
-      sprintf_P(buffer, PSTR("%02hu:%02hu"), h, m);     // 12:34
-      return 5;
+      sprintf_P(buffer, PSTR("%02hu:%02hu:%02hu"), h, m, s);     // 12:34:56
+      return 8;
     }
     else {
-      sprintf_P(buffer, PSTR("%hu:%02hu"), h, m);       // 123:45
-      return 6;
+      sprintf_P(buffer, PSTR("%hu:%02hu:%02hu"), h, m);       // 123:45:01
+      return 9;
     }
   }
 
