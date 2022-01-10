@@ -568,7 +568,7 @@ void MenuItem_confirm::draw_select_screen(PGM_P const yes, PGM_P const no, const
 
 struct MotionAxisState {
   xy_int_t xValuePos, yValuePos, zValuePos, eValuePos, stepValuePos, zTypePos, eNamePos;
-  float currentStepSize = 10.0;
+  float currentStepSize = 100.0;
   int z_selection = Z_SELECTION_Z;
   uint8_t e_selection = 0;
   bool blocked = false;
@@ -771,8 +771,8 @@ static void z_minus() { moveAxis(Z_AXIS, -1); }
   }
 
   static void step_size() {
-    motionAxisState.currentStepSize = motionAxisState.currentStepSize / 10.0;
-    if (motionAxisState.currentStepSize < 0.0015) motionAxisState.currentStepSize = 10.0;
+    motionAxisState.currentStepSize = motionAxisState.currentStepSize / 100.0;
+    if (motionAxisState.currentStepSize < 0.0015) motionAxisState.currentStepSize = 100.0;
     quick_feedback();
     drawCurStepValue();
   }
