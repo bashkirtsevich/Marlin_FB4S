@@ -771,7 +771,7 @@ static void z_minus() { moveAxis(Z_AXIS, -1); }
   }
 
   static void step_size() {
-    motionAxisState.currentStepSize = motionAxisState.currentStepSize / 100.0;
+    motionAxisState.currentStepSize = motionAxisState.currentStepSize / 10.0;
     if (motionAxisState.currentStepSize < 0.0015) motionAxisState.currentStepSize = 100.0;
     quick_feedback();
     drawCurStepValue();
