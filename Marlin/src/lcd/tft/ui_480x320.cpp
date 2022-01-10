@@ -339,7 +339,7 @@ void MarlinUI::draw_status_screen() {
   tft.canvas(284, y, 128, 29);
   tft.set_background(COLOR_BACKGROUND);
   tft_string.set(buffer);
-  tft.add_text(284, 0, COLOR_PRINT_PERCENTS, tft_string);
+  tft.add_text(0, 0, COLOR_PRINT_PERCENTS, tft_string);
 
   y += TERN(HAS_UI_480x272, 28, 36);
   // progress bar
