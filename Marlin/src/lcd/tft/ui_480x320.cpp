@@ -335,10 +335,10 @@ void MarlinUI::draw_status_screen() {
 
   // percents str
   const uint8_t progress = ui.get_progress_percent();
-  sprintf_P(buffer, PSTR("%hu%"), progress);  
   tft.canvas(284, y, 128, 29);
   tft.set_background(COLOR_BACKGROUND);
-  tft_string.set(buffer);
+  tft_string.set(i8tostr3rj(progress));
+  tft_string.add('%');
   tft.add_text(0, 0, COLOR_PRINT_PERCENTS, tft_string);
 
   y += TERN(HAS_UI_480x272, 28, 36);
