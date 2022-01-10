@@ -328,14 +328,21 @@ void MarlinUI::draw_status_screen() {
   duration_t elapsed = print_job_timer.duration();
   elapsed.toDigital(buffer);
 
-  tft.canvas((TFT_WIDTH - 128) / 2, y, 128, 29);
+  tft.canvas(96, y, 128, 29);
   tft.set_background(COLOR_BACKGROUND);
   tft_string.set(buffer);
-  tft.add_text(tft_string.center(128), 0, COLOR_PRINT_TIME, tft_string);
+  tft.add_text(0, 0, COLOR_PRINT_TIME, tft_string);
+
+  // percents str
+  const uint8_t progress = ui.get_progress_percent();
+  sprintf_P(buffer, PSTR("%hu%"), progress);  
+  tft.canvas(284, y, 128, 29);
+  tft.set_background(COLOR_BACKGROUND);
+  tft_string.set(buffer);
+  tft.add_text(284, 0, COLOR_PRINT_PERCENTS, tft_string);
 
   y += TERN(HAS_UI_480x272, 28, 36);
   // progress bar
-  const uint8_t progress = ui.get_progress_percent();
   tft.canvas(4, y, TFT_WIDTH - 8, 9);
   tft.set_background(COLOR_PROGRESS_BG);
   tft.add_rectangle(0, 0, TFT_WIDTH - 8, 9, COLOR_PROGRESS_FRAME);

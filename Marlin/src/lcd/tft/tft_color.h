@@ -120,6 +120,10 @@
   #define COLOR_PRINT_TIME        COLOR_AQUA
 #endif
 
+#ifndef COLOR_PRINT_PERCENTS
+  #define COLOR_PRINT_PERCENTS        COLOR_AQUA
+#endif
+
 #ifndef COLOR_PROGRESS_FRAME
   #define COLOR_PROGRESS_FRAME    COLOR_WHITE
 #endif
