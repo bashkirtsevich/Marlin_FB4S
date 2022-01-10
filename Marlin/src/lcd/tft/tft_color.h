@@ -68,7 +68,7 @@
 #define COLOR_DARK_ORANGE     0xFC40  // #FF8C00
 #define COLOR_CORAL_RED       0xF9E7  // #FF3F3F
 
-#define COLOR_DDEEP_BLUE      0x20AC  // #1E156E
+#define COLOR_DEEP_BLUE       0x20AC  // #1E156E
 
 #ifndef COLOR_BACKGROUND
   #define COLOR_BACKGROUND    COLOR_BLACK
