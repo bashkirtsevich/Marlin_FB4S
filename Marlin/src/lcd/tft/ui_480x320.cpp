@@ -569,7 +569,7 @@ void MenuItem_confirm::draw_select_screen(PGM_P const yes, PGM_P const no, const
 
 struct MotionAxisState {
   xy_int_t xValuePos, yValuePos, zValuePos, eValuePos, stepValuePos, zTypePos, eNamePos;
-  float currentStepSize = 100.0;
+  float currentStepSize = 10.0;
   int z_selection = Z_SELECTION_Z;
   uint8_t e_selection = 0;
   bool blocked = false;
