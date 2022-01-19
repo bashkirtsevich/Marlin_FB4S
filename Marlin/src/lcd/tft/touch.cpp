@@ -36,6 +36,10 @@
   #include "../../feature/bedlevel/bedlevel.h"
 #endif
 
+#if HAS_LEVELING
+  #include "../../feature/bedlevel/bedlevel.h"
+#endif
+
 #include "tft.h"
 
 bool Touch::enabled = true;
@@ -244,6 +248,13 @@ void Touch::touch(touch_control_t *control) {
 
     // TODO: TOUCH could receive data to pass to the callback
     case BUTTON: ((screenFunc_t)control->data)(); break;
+
+    #if BOTH(MESH_BED_LEVELING, LCD_BED_LEVELING)
+      case Z_OFFSET:
+        ui.clear_lcd();
+        MenuItem_float43::action((const char *)GET_TEXT_F(MSG_BED_Z), &mbl.z_offset, -1, 1);
+        break;
+    #endif
 
     default: break;
   }

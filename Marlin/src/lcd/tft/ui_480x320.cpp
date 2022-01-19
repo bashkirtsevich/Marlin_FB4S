@@ -216,6 +216,24 @@ void draw_fan_status(uint16_t x, uint16_t y, const bool blink) {
   tft.add_text(tft_string.center(80) + 6, 82, COLOR_FAN, tft_string);
 }
 
+void draw_moving(uint16_t x, uint16_t y) {
+  TERN_(TOUCH_SCREEN, touch.add_control(MOVE_AXIS, x, y, 80, 120));
+  tft.canvas(x, y, 80, 120);
+  tft.set_background(COLOR_BACKGROUND);
+
+  tft.add_image(8, 20, imgSettings, COLOR_YELLOW);
+}
+
+#if ENABLED(TOUCH_SCREEN)
+void draw_menu_btn(uint16_t x, uint16_t y) {
+  TERN_(TOUCH_SCREEN, touch.add_control(MENU_SCREEN, x, y, 80, 120, (intptr_t)menu_main));
+  tft.canvas(x, y, 80, 120);
+  tft.set_background(COLOR_BACKGROUND);
+
+  tft.add_image(8, 20, imgMenu, COLOR_CONTROL_ENABLED);
+}
+#endif
+
 void MarlinUI::draw_status_screen() {
   const bool blink = get_blink();
 
@@ -248,108 +266,90 @@ void MarlinUI::draw_status_screen() {
       #ifdef ITEM_FAN
         case ITEM_FAN: draw_fan_status(x, y, blink); break;
       #endif
+      #ifdef ITEM_MOVING
+        case ITEM_MOVING: draw_moving(x, y); break;
+      #endif
+      #ifdef ITEM_MENU
+        #if ENABLED(TOUCH_SCREEN)
+        case ITEM_MENU: draw_menu_btn(x, y); break;
+        #endif
+      #endif
     }
   }
 
   y += TERN(HAS_UI_480x272, 118, 128);
+  #if ENABLED(TOUCH_SCREEN)
+    if (!printJobOngoing()) {
+      // draw print button
+      MarlinImage img_id = imgSD;
+      tImage img = Images[img_id];
 
-  // coordinates
-  tft.canvas(4, y, TFT_WIDTH - 8, FONT_LINE_HEIGHT);
-  tft.set_background(COLOR_BACKGROUND);
-  tft.add_rectangle(0, 0, TFT_WIDTH - 8, FONT_LINE_HEIGHT, COLOR_AXIS_HOMED);
+      TERN_(SDSUPPORT, add_control(
+        TFT_WIDTH - img.width - 16, TFT_HEIGHT / 2 - img.height / 2 + 16, 
+        menu_media, img_id, true, COLOR_CONTROL_ENABLED, card.isMounted() ? COLOR_CONTROL_DISABLED : COLOR_BUSY));
+    } else {
+      // draw pause and abort buttons
+    }
+  #endif
 
-  if (TERN0(LCD_SHOW_E_TOTAL, printingIsActive())) {
-    #if ENABLED(LCD_SHOW_E_TOTAL)
-      tft.add_text( 16, 3, COLOR_AXIS_HOMED , "E");
-      const uint8_t escale = e_move_accumulator >= 100000.0f ? 10 : 1; // After 100m switch to cm
-      tft_string.set(ftostr4sign(e_move_accumulator / escale));
-      tft_string.add(escale == 10 ? 'c' : 'm');
-      tft_string.add('m');
-      tft.add_text(192 - tft_string.width(), 3, COLOR_AXIS_HOMED, tft_string);
-    #endif
-  }
-  else {
-    tft.add_text( 16, 3, COLOR_AXIS_HOMED , "X");
-    const bool nhx = axis_should_home(X_AXIS);
-    tft_string.set(blink && nhx ? "?" : ftostr4sign(LOGICAL_X_POSITION(current_position.x)));
-    tft.add_text(102 - tft_string.width(), 3, nhx ? COLOR_AXIS_NOT_HOMED : COLOR_AXIS_HOMED, tft_string);
-
-    tft.add_text(192, 3, COLOR_AXIS_HOMED , "Y");
-    const bool nhy = axis_should_home(Y_AXIS);
-    tft_string.set(blink && nhy ? "?" : ftostr4sign(LOGICAL_Y_POSITION(current_position.y)));
-    tft.add_text(280 - tft_string.width(), 3, nhy ? COLOR_AXIS_NOT_HOMED : COLOR_AXIS_HOMED, tft_string);
-  }
-  tft.add_text(330, 3, COLOR_AXIS_HOMED , "Z");
-  uint16_t offset = 32;
-  const bool nhz = axis_should_home(Z_AXIS);
-  if (blink && nhz)
-    tft_string.set("?");
-  else {
-    const float z = LOGICAL_Z_POSITION(current_position.z);
-    tft_string.set(ftostr52sp((int16_t)z));
-    tft_string.rtrim();
-    offset += tft_string.width();
-
-    tft_string.set(ftostr52sp(z));
-    offset -= tft_string.width();
-  }
-  tft.add_text(455 - tft_string.width() - offset, 3, nhz ? COLOR_AXIS_NOT_HOMED : COLOR_AXIS_HOMED, tft_string);
-  TERN_(TOUCH_SCREEN, touch.add_control(MOVE_AXIS, 4, y, TFT_WIDTH - 8, FONT_LINE_HEIGHT));
-
-  y += TERN(HAS_UI_480x272, 38, 48);
   // feed rate
-  tft.canvas(96, y, 100, 32);
+  tft.canvas(16, y, 100, 32);
   tft.set_background(COLOR_BACKGROUND);
   uint16_t color = feedrate_percentage == 100 ? COLOR_RATE_100 : COLOR_RATE_ALTERED;
   tft.add_image(0, 0, imgFeedRate, color);
   tft_string.set(i16tostr3rj(feedrate_percentage));
   tft_string.add('%');
   tft.add_text(36, 1, color , tft_string);
-  TERN_(TOUCH_SCREEN, touch.add_control(FEEDRATE, 96, 176, 100, 32));
+  TERN_(TOUCH_SCREEN, touch.add_control(FEEDRATE, 16, y, 100, 32));
 
-  // flow rate
-  tft.canvas(284, y, 100, 32);
-  tft.set_background(COLOR_BACKGROUND);
-  color = planner.flow_percentage[0] == 100 ? COLOR_RATE_100 : COLOR_RATE_ALTERED;
-  tft.add_image(0, 0, imgFlowRate, color);
-  tft_string.set(i16tostr3rj(planner.flow_percentage[active_extruder]));
-  tft_string.add('%');
-  tft.add_text(36, 1, color , tft_string);
-  TERN_(TOUCH_SCREEN, touch.add_control(FLOWRATE, 284, 176, 100, 32, active_extruder));
-
-  #if ENABLED(TOUCH_SCREEN)
-    add_control(404, y, menu_main, imgSettings);
-    TERN_(SDSUPPORT, add_control(12, y, menu_media, imgSD, !printingIsActive(), COLOR_CONTROL_ENABLED, card.isMounted() && printingIsActive() ? COLOR_BUSY : COLOR_CONTROL_DISABLED));
-  #endif
-
-  y += TERN(HAS_UI_480x272, 36, 44);
   // print duration
   char buffer[14];
   duration_t elapsed = print_job_timer.duration();
   elapsed.toDigital(buffer);
 
-  tft.canvas(96, y, 128, 29);
+  tft.canvas(132, y, 128, 29);
   tft.set_background(COLOR_BACKGROUND);
   tft_string.set(buffer);
   tft.add_text(0, 0, COLOR_PRINT_TIME, tft_string);
 
+  y += TERN(HAS_UI_480x272, 36, 44);
+  // flow rate
+  tft.canvas(16, y, 100, 32);
+  tft.set_background(COLOR_BACKGROUND);
+  color = planner.flow_percentage[0] == 100 ? COLOR_RATE_100 : COLOR_RATE_ALTERED;
+  tft.add_image(0, 0, imgFlowRate, color);
+  tft_string.set(ui16tostr3rj(planner.flow_percentage[active_extruder]));
+  tft_string.add('%');
+  tft.add_text(36, 1, color , tft_string);
+  TERN_(TOUCH_SCREEN, touch.add_control(FLOWRATE, 16, y, 100, 32, active_extruder));
+
   // percents str
   const uint8_t progress = ui.get_progress_percent();
-  tft.canvas(284, y, 128, 29);
+  tft.canvas(132, y, 128, 29);
   tft.set_background(COLOR_BACKGROUND);
-  tft_string.set(i8tostr3rj(progress));
+  tft_string.set(ui8tostr3rj(progress));
   tft_string.add('%');
   tft.add_text(0, 0, COLOR_PRINT_PERCENTS, tft_string);
 
-  y += TERN(HAS_UI_480x272, 28, 36);
-  // progress bar
-  tft.canvas(4, y, TFT_WIDTH - 8, 9);
-  tft.set_background(COLOR_PROGRESS_BG);
-  tft.add_rectangle(0, 0, TFT_WIDTH - 8, 9, COLOR_PROGRESS_FRAME);
-  if (progress)
-    tft.add_bar(1, 1, ((TFT_WIDTH - 10) * progress) / 100, 7, COLOR_PROGRESS_BAR);
+  y += TERN(HAS_UI_480x272, 36, 44);
+  // z-offset
+  tft.canvas(16, y, 100, 32);
+  tft.set_background(COLOR_BACKGROUND);
+  tft.add_image(0, 0, imgLeveling, COLOR_AQUA);
+  
+  const bool nhz = axis_should_home(Z_AXIS);
+  if (blink && nhz)
+    tft_string.set("?");
+  else {
+    const float z = LOGICAL_Z_POSITION(current_position.z);
+    tft_string.set(ftostr52sp((int16_t)z));
+    // tft_string.rtrim();
+    // tft_string.set(ftostr52sp(z));
+  }
+  tft.add_text(36, 1, COLOR_AQUA , tft_string);
+  TERN_(TOUCH_SCREEN, touch.add_control(Z_OFFSET, 16, y, 100, 32));
 
-  y += 20;
+  y = TFT_HEIGHT - FONT_LINE_HEIGHT - 5;
   // status message
   tft.canvas(0, y, TFT_WIDTH, FONT_LINE_HEIGHT - 5);
   tft.set_background(COLOR_BACKGROUND);
@@ -422,8 +422,8 @@ void MenuEditItemBase::draw_edit_screen(PGM_P const pstr, const char * const val
 void TFT::draw_edit_screen_buttons() {
   #if ENABLED(TOUCH_SCREEN)
     add_control(64, TFT_HEIGHT - 64, DECREASE, imgDecrease);    
-    add_control(160, TFT_HEIGHT - 64, BACK, imgCancel);
-    add_control(256, TFT_HEIGHT - 64, CLICK, imgConfirm);
+    add_control(160, TFT_HEIGHT - 64, BACK, imgCancel, true, COLOR_CONTROL_CANCEL);
+    add_control(256, TFT_HEIGHT - 64, CLICK, imgConfirm, true, COLOR_CONTROL_CONFIRM);
     add_control(352, TFT_HEIGHT - 64, INCREASE, imgIncrease);
   #endif
 }

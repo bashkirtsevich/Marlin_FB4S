@@ -84,5 +84,7 @@ void menu_item(const uint8_t row, bool sel = false);
   #define ITEM_E0         0
   #define ITEM_BED        1
   #define ITEM_FAN        2
-  #define ITEMS_COUNT     3
+  #define ITEM_MOVING     3
+  #define ITEM_MENU       4
+  #define ITEMS_COUNT     5
 #endif
