@@ -232,6 +232,22 @@ void draw_menu_btn(uint16_t x, uint16_t y) {
 
   tft.add_image(8, 20, imgMenu, COLOR_CONTROL_ENABLED);
 }
+
+void draw_print_control(uint16_t id, TouchControlType type, MarlinImage img_id, uint16_t color_main = COLOR_WHITE) {
+  uint16_t x, y, h, w;
+  tImage img = Images[img_id];
+
+  w = img.width;
+  h = img.height;
+  x = TFT_WIDTH - w * id - 16 - 8;
+  y = TFT_HEIGHT / 2 - h / 2 + 16;
+
+  TERN_(TOUCH_SCREEN, touch.add_control(type, x, y, w, h));
+  
+  tft.canvas(x, y, w, h);
+  tft.set_background(COLOR_BACKGROUND);
+  tft.add_image(0, 0, img_id, color_main);
+}
 #endif
 
 void MarlinUI::draw_status_screen() {
@@ -284,11 +300,16 @@ void MarlinUI::draw_status_screen() {
       MarlinImage img_id = imgSD;
       tImage img = Images[img_id];
 
+      tft.canvas(TFT_WIDTH - img.width  * 2 - 16, TFT_HEIGHT / 2 - img.height / 2 + 16, img.width, img.height);
+      tft.set_background(COLOR_BACKGROUND);
+
       TERN_(SDSUPPORT, add_control(
         TFT_WIDTH - img.width - 16, TFT_HEIGHT / 2 - img.height / 2 + 16, 
         menu_media, img_id, true, COLOR_CONTROL_ENABLED, card.isMounted() ? COLOR_CONTROL_DISABLED : COLOR_BUSY));
     } else {
       // draw pause and abort buttons
+      draw_print_control(1, STOP_PRINT, imgCancel, COLOR_CONTROL_CANCEL);
+      draw_print_control(2, printingIsPaused() ? RESUME_PRINT : PAUSE_PRINT, imgPause, printingIsPaused() ? blink ? COLOR_CONTROL_ENABLED : COLOR_YELLOW : COLOR_CONTROL_ENABLED);
     }
   #endif
 

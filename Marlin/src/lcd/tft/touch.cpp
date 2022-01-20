@@ -256,6 +256,25 @@ void Touch::touch(touch_control_t *control) {
         break;
     #endif
 
+    case PAUSE_PRINT:
+        ui.pause_print(); 
+        break;
+
+    case RESUME_PRINT:
+        ui.resume_print(); 
+        break;
+
+    case STOP_PRINT: 
+        ui.clear_lcd();
+        ui.goto_screen([]{
+          MenuItem_confirm::select_screen(
+            GET_TEXT(MSG_BUTTON_STOP), GET_TEXT(MSG_BACK),
+            ui.abort_print, nullptr,
+            GET_TEXT(MSG_STOP_PRINT), (const char *)nullptr, PSTR("?")
+          ); 
+        });
+        break;
+
     default: break;
   }
 }
