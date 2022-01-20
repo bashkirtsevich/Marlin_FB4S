@@ -342,9 +342,7 @@ void MarlinUI::draw_status_screen() {
     tft_string.set("?");
   else {
     const float z = LOGICAL_Z_POSITION(current_position.z);
-    tft_string.set(ftostr52sp((int16_t)z));
-    // tft_string.rtrim();
-    // tft_string.set(ftostr52sp(z));
+    tft_string.set(ftostr52sp(z));
   }
   tft.add_text(36, 1, COLOR_AQUA , tft_string);
   TERN_(TOUCH_SCREEN, touch.add_control(Z_OFFSET, 16, y, 100, 32));
