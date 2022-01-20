@@ -97,6 +97,7 @@ const tImage Images[imgCount] = {
   Cancel_64x64x4,
   Increase_64x64x4,
   Decrease_64x64x4,
+  Pause_64x64x4,
   Back_32x32x4,
   Up_32x32x4,
   Down_32x32x4,

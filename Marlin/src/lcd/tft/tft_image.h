@@ -86,6 +86,7 @@ enum MarlinImage : uint8_t {
   imgCancel,
   imgIncrease,
   imgDecrease,
+  imgPause,
   imgBack,
   imgUp,
   imgDown,
